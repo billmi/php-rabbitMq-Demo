@@ -47,17 +47,30 @@ function startCMQ(){
     $q->setName($q_name);
     $q->bind($e_name, $k_route);
 
-    $response = $q->get();
-    if($response != false){
-        $message = $response->getBody();
+    //接收答应方式
+//    $response = $q->get();
+//    if($response != false){
+//        $message = $response->getBody();
+//        if(!empty($message)){
+//            $res = $q->ack($response->getDeliveryTag());
+//            echo "rev message!...";
+//            saveLog("queue",$message);
+//            var_dump($message);
+//        }
+//    }
+
+    //阻塞自动应答 processMessage 为回调
+    $q->consume(function (\AMQPEnvelope $envelope,\AMQPQueue $queue){
+        $message = $envelope->getBody();
         if(!empty($message)){
-            $res = $q->ack($response->getDeliveryTag());
             echo "rev message!...";
             saveLog("queue",$message);
             var_dump($message);
         }
-    }
+    }, AMQP_AUTOACK); //自动ACK应答
 }
+
+
 while (true) {
     echo "start serv!....";
     startCMQ();
